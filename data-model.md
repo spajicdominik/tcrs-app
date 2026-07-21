@@ -5,14 +5,14 @@
 erDiagram
     USER ||--o{ RESERVATION : books
     USER |o--o{ RESERVATION : "is partner in"
-    USER ||--o{ GROUP_PLAYER
+    USER ||--o{ GROUP_PLAYER : is
     USER ||--o{ MATCH : "is player1 in"
     USER ||--o{ MATCH : "is player2 in"
     USER |o--o{ MATCH : "won"
     USER |o--o{ MATCH : "entered score for"
     TOURNAMENT ||--|{ GROUP : has
     GROUP ||--o{ GROUP_PLAYER : has
-    GROUP ||--o{ MATCH
+    GROUP ||--o{ MATCH : has
     MATCH |o--o{ MATCH : "winner advances to"
 
     USER {
