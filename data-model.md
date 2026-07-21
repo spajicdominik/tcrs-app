@@ -64,7 +64,7 @@ erDiagram
       int player1_games
       int player2_games
       bigint winner_id FK
-      bigint score_entered_by FK null
+      bigint score_entered_by FK "nullable"
       bigint group_id FK
       int round_number
       bigint next_match_id FK
