@@ -1,12 +1,15 @@
 package com.tcrs_app.tcrs_app.controllers;
 
 import com.tcrs_app.tcrs_app.payload.request.AuthenticationRequest;
+import com.tcrs_app.tcrs_app.payload.request.EnableUserRequest;
 import com.tcrs_app.tcrs_app.payload.request.RefreshTokenRequest;
 import com.tcrs_app.tcrs_app.payload.request.RegisterRequest;
 import com.tcrs_app.tcrs_app.payload.response.AuthenticationResponse;
+import com.tcrs_app.tcrs_app.payload.response.EnableUserResponse;
 import com.tcrs_app.tcrs_app.payload.response.RefreshTokenResponse;
 import com.tcrs_app.tcrs_app.payload.response.RegisterResponse;
 import com.tcrs_app.tcrs_app.services.AuthenticationService;
+import com.tcrs_app.tcrs_app.services.EnableUserService;
 import com.tcrs_app.tcrs_app.services.JwtService;
 import com.tcrs_app.tcrs_app.services.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,21 +28,11 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final RefreshTokenService refreshTokenService;
     private final JwtService jwtService;
+    private final EnableUserService enableUserService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authenticationService.register(request));
-    }
-
-    @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
-        ResponseCookie jwtCookie = jwtService.generateJwtCookie(authenticationResponse.getAccessToken());
-        ResponseCookie refreshTokenCookie = refreshTokenService.generateRefreshTokenCookie(authenticationResponse.getRefreshToken());
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(authenticationResponse);
     }
 
     @PostMapping("/refresh-token")
@@ -70,5 +63,22 @@ public class AuthenticationController {
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .build();
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
+        ResponseCookie jwtCookie = jwtService.generateJwtCookie(authenticationResponse.getAccessToken());
+        ResponseCookie refreshTokenCookie = refreshTokenService.generateRefreshTokenCookie(authenticationResponse.getRefreshToken());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(authenticationResponse);
+    }
+
+    @PostMapping("enable")
+    public ResponseEntity<EnableUserResponse> enableUser(@RequestBody EnableUserRequest request) {
+        EnableUserResponse enableUserResponse = enableUserService.enableUser(request);
+        return ResponseEntity.ok(enableUserResponse);
     }
 }

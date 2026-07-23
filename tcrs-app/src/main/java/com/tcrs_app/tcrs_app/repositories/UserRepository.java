@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // admin: list everyone awaiting approval (or any status)
     List<User> findByStatus(AppUserStatus status);
 
+    void enableUser(String email);
+
 }
