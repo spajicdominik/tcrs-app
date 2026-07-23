@@ -25,5 +25,5 @@ public class GroupPlayer {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private AppUser user;
+    private User user;
 }

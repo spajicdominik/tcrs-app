@@ -27,10 +27,7 @@ public class JwtServiceImpl implements JwtService{
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
 
-    @Value("${jwt.refresh")
-    private Long refreshExpiration;
-
-    @Value("jwt-cookie")
+    @Value("${jwt.cookie-name}")
     private String jwtCookieName;
 
     @Override

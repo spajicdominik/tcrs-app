@@ -1,23 +1,18 @@
 package com.tcrs_app.tcrs_app.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tcrs_app.tcrs_app.enums.AppUserRole;
-import com.tcrs_app.tcrs_app.enums.TokenType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthenticationResponse {
-    private  Long id;
+    private Long id;
     private String email;
-    private List<String> roles;
 
     @JsonProperty("access_token")
     private String accessToken;
@@ -25,5 +20,4 @@ public class AuthenticationResponse {
     private String refreshToken;
     @JsonProperty("token_type")
     private String tokenType;
-
 }

@@ -1,0 +1,1 @@
+ALTER TABLE app_user ALTER COLUMN phone_number DROP NOT NULL;

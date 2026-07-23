@@ -26,11 +26,11 @@ public class Match {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player1_id", nullable = false)
-    private AppUser player1;
+    private User player1;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player2_id", nullable = false)
-    private AppUser player2;
+    private User player2;
 
     // null until the match is played
     @Column(name = "player1_games")
@@ -42,12 +42,12 @@ public class Match {
     // null while unresolved
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winner_id")
-    private AppUser winner;
+    private User winner;
 
     // null until a score is entered
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "score_entered_by")
-    private AppUser scoreEnteredBy;
+    private User scoreEnteredBy;
 
     // self-reference: the match the winner advances to; null for group matches and the final
     @ManyToOne(fetch = FetchType.LAZY)

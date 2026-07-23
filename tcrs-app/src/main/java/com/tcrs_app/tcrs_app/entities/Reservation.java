@@ -39,11 +39,11 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "main_player_id", nullable = false)
-    private AppUser mainPlayer;
+    private User mainPlayer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "partner_id")
-    private AppUser partner;
+    private User partner;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id")
