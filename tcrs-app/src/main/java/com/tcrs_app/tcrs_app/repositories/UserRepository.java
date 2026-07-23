@@ -11,6 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // login: look a user up by their username
     Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 
     // registration validation: is this username / email already taken?
     boolean existsByUsername(String username);
@@ -18,4 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // admin: list everyone awaiting approval (or any status)
     List<User> findByStatus(AppUserStatus status);
+
 }

@@ -4,6 +4,9 @@ import com.tcrs_app.tcrs_app.enums.AppUserRole;
 import com.tcrs_app.tcrs_app.enums.AppUserStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 @Builder
 @Getter
@@ -44,4 +47,5 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private AppUserRole role;
+
 }

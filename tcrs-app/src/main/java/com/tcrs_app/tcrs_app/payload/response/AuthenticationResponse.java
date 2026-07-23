@@ -1,6 +1,7 @@
 package com.tcrs_app.tcrs_app.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.tcrs_app.tcrs_app.enums.AppUserRole;
 import com.tcrs_app.tcrs_app.enums.TokenType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
