@@ -31,9 +31,12 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
+    public ResponseEntity<?> createReservation(
             @Valid @RequestBody CreateReservationRequest request,
             @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
         ReservationResponse response = reservationService.createReservation(request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
