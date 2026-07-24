@@ -2,6 +2,7 @@ package com.tcrs_app.tcrs_app.handlers;
 
 
 import com.tcrs_app.tcrs_app.enums.AppUserRole;
+import com.tcrs_app.tcrs_app.exception.ReservationException;
 import com.tcrs_app.tcrs_app.exception.TokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,18 @@ public class TokenControllerHandler {
                 .path(request.getDescription(false))
                 .build();
         return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = ReservationException.class)
+    public ResponseEntity<ErrorResponse> handleReservationException(ReservationException ex, WebRequest request) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .error(ex.getStatus().getReasonPhrase())
+                .status(ex.getStatus().value())
+                .message(ex.getMessage())
+                .path(request.getDescription(false))
+                .build();
+        return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -40,7 +40,7 @@ public class SecurityConfiguration {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/api/v1/auth/**", "/error").permitAll()
+                                .requestMatchers("/api/v1/auth/**", "/error", "/api/v1/reservation/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)

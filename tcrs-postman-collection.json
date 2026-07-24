@@ -1,0 +1,205 @@
+{
+  "info": {
+    "name": "TCRS - Reservations",
+    "description": "Tests for POST /api/v1/reservation and its error handling.\n\nHow to use:\n1. Set the collection variables `email` and `password` to an ACTIVE user's credentials.\n2. Run \"Authenticate\" first - it stores the JWT cookie automatically (Postman keeps cookies per domain).\n3. Run the create-reservation requests. Times are computed dynamically by the collection pre-request script, so they never go stale.\n\nRequires Postman's cookie jar to be enabled (default).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "email", "value": "admin@tcrs.com" },
+    { "key": "password", "value": "changeme" },
+    { "key": "partnerId", "value": "2" },
+    { "key": "validStart", "value": "" },
+    { "key": "pastStart", "value": "" },
+    { "key": "badMinuteStart", "value": "" },
+    { "key": "outOfHoursStart", "value": "" },
+    { "key": "tooFarStart", "value": "" }
+  ],
+  "event": [
+    {
+      "listen": "prerequisite",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Build an ISO-8601 timestamp WITH the machine's UTC offset (matches OffsetDateTime).",
+          "function iso(date) {",
+          "  const pad = (n) => String(n).padStart(2, '0');",
+          "  const off = -date.getTimezoneOffset(); // minutes east of UTC",
+          "  const sign = off >= 0 ? '+' : '-';",
+          "  const oh = pad(Math.floor(Math.abs(off) / 60));",
+          "  const om = pad(Math.abs(off) % 60);",
+          "  return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) +",
+          "    'T' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds()) +",
+          "    sign + oh + ':' + om;",
+          "}",
+          "function atTime(dayOffset, hour, minute) {",
+          "  const d = new Date();",
+          "  d.setDate(d.getDate() + dayOffset);",
+          "  d.setHours(hour, minute, 0, 0);",
+          "  return iso(d);",
+          "}",
+          "// valid: tomorrow at 10:00",
+          "pm.collectionVariables.set('validStart', atTime(1, 10, 0));",
+          "// past: yesterday at 10:00",
+          "pm.collectionVariables.set('pastStart', atTime(-1, 10, 0));",
+          "// bad minute: tomorrow at 10:15 (not on :00 / :30)",
+          "pm.collectionVariables.set('badMinuteStart', atTime(1, 10, 15));",
+          "// out of hours: tomorrow at 21:00 (after 19:00 latest start)",
+          "pm.collectionVariables.set('outOfHoursStart', atTime(1, 21, 0));",
+          "// too far: 10 days from now at 10:00 (> 1 week)",
+          "pm.collectionVariables.set('tooFarStart', atTime(10, 10, 0));"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Authenticate (sets JWT cookie)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/auth/authenticate", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","authenticate"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('login succeeds (200)', () => pm.response.to.have.status(200));",
+              "pm.test('jwt cookie was set', () => {",
+              "  const jar = pm.cookies;",
+              "  pm.expect(jar.has('jwt-token') || pm.response.headers.has('Set-Cookie')).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create reservation - valid",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"timeStart\": \"{{validStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('created (201)', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('timeEnd is 90 min after start', () => {",
+              "  const diff = (new Date(body.timeEnd) - new Date(body.timeStart)) / 60000;",
+              "  pm.expect(diff).to.eql(90);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create reservation - with partner",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"timeStart\": \"{{validStart}}\",\n  \"matchType\": \"FRIENDLY\",\n  \"partnerId\": {{partnerId}}\n}"
+        }
+      },
+      "description": "NOTE: reuses validStart, so run this INSTEAD of the plain valid one (same slot would collide -> 409)."
+    },
+    {
+      "name": "Error - overlapping slot (409)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"timeStart\": \"{{validStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}"
+        }
+      },
+      "description": "Run AFTER 'Create reservation - valid' to hit the same slot.",
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [ "pm.test('conflict (409)', () => pm.response.to.have.status(409));" ] }
+        }
+      ]
+    },
+    {
+      "name": "Error - not on :00/:30 (400)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": { "mode": "raw", "raw": "{\n  \"timeStart\": \"{{badMinuteStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}" }
+      },
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('bad request (400)', () => pm.response.to.have.status(400));" ] } } ]
+    },
+    {
+      "name": "Error - outside opening hours (400)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": { "mode": "raw", "raw": "{\n  \"timeStart\": \"{{outOfHoursStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}" }
+      },
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('bad request (400)', () => pm.response.to.have.status(400));" ] } } ]
+    },
+    {
+      "name": "Error - in the past (400)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": { "mode": "raw", "raw": "{\n  \"timeStart\": \"{{pastStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}" }
+      },
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('bad request (400)', () => pm.response.to.have.status(400));" ] } } ]
+    },
+    {
+      "name": "Error - more than a week ahead (400)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": { "mode": "raw", "raw": "{\n  \"timeStart\": \"{{tooFarStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}" }
+      },
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('bad request (400)', () => pm.response.to.have.status(400));" ] } } ]
+    },
+    {
+      "name": "Error - missing matchType (400 validation)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": { "mode": "raw", "raw": "{\n  \"timeStart\": \"{{validStart}}\"\n}" }
+      },
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('bad request (400)', () => pm.response.to.have.status(400));" ] } } ]
+    },
+    {
+      "name": "Error - no auth (401)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/api/v1/reservation", "host": ["{{baseUrl}}"], "path": ["api","v1","reservation"] },
+        "body": { "mode": "raw", "raw": "{\n  \"timeStart\": \"{{validStart}}\",\n  \"matchType\": \"FRIENDLY\"\n}" }
+      },
+      "description": "To test this, clear cookies for localhost first (Cookies -> localhost -> remove jwt-token). Expect 401.",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('unauthorized (401)', () => pm.response.to.have.status(401));" ] } } ]
+    }
+  ]
+}
