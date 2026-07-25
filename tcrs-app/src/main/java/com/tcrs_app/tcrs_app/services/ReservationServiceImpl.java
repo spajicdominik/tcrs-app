@@ -32,9 +32,12 @@ public class ReservationServiceImpl implements ReservationService {
     private static final int MAX_DAYS_AHEAD = 7;
 
     @Override
-    public List<Reservation> getActiveReservations() {
+    public List<ReservationResponse> getActiveReservations() {
         OffsetDateTime now = OffsetDateTime.now();
-        return reservationRepository.findByTimeStartBetween(now, now.plusDays(MAX_DAYS_AHEAD));
+        return reservationRepository.findByTimeStartBetween(now, now.plusDays(MAX_DAYS_AHEAD))
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override

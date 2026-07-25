@@ -1,6 +1,5 @@
 package com.tcrs_app.tcrs_app.controllers;
 
-import com.tcrs_app.tcrs_app.entities.Reservation;
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.payload.request.CreateReservationRequest;
 import com.tcrs_app.tcrs_app.payload.response.ReservationResponse;
@@ -26,7 +25,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public List<Reservation> getActiveReservations() {
+    public List<ReservationResponse> getActiveReservations() {
         return reservationService.getActiveReservations();
     }
 
