@@ -5,7 +5,7 @@ const RoutesComponent = () => {
 
     return (
         <div>
-            <BrowserRouter>
+            <BrowserRouter basename="/">
                 <Routes>
                     <Route path="/register" element={<RegisterForm/>}/>
                 </Routes>
