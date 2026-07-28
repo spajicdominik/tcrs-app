@@ -21,6 +21,7 @@ const RegisterForm: React.FC = () => (
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
+        className="flex flex-col gap-4"
     >
         <Form.Item<RegisterRequest>
             label="E-mail"

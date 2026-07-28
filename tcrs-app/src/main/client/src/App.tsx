@@ -1,12 +1,8 @@
 import './App.css'
-import RegisterForm from "./features/auth/components/RegisterForm.tsx";
+import RoutesComponent from "./routers/Routes.tsx";
 
 function App() {
-  return (
-    <>
-     <RegisterForm/>
-    </>
-  )
+  return <RoutesComponent/>
 }
 
 export default App
