@@ -2,9 +2,18 @@ import React from 'react';
 import type { FormProps } from 'antd';
 import { Button, Form, Input } from 'antd';
 import type {RegisterRequest} from "../types/RegisterRequest.ts";
+import axios, {type AxiosResponse} from "axios";
+import {AUTH_URL} from "../../../constants";
 
-const onFinish: FormProps<RegisterRequest>['onFinish'] = (values) => {
+const onFinish: FormProps<RegisterRequest>['onFinish'] = async (values) => {
     console.log('Success:', values);
+    const payload : RegisterRequest = values;
+    try {
+        const response : AxiosResponse = await axios.post(AUTH_URL + "/register", payload);
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error);
+    }
 };
 
 const onFinishFailed: FormProps<RegisterRequest>['onFinishFailed'] = (errorInfo) => {
