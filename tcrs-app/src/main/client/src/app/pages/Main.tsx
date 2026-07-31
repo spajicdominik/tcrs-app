@@ -1,24 +1,34 @@
-import React from "react";
-import { IlamyCalendar } from '@ilamy/calendar';
+import {useState, useEffect} from "react";
+import { EventCalendar } from '@mui/x-scheduler/event-calendar';
+import type {SchedulerEvent} from '@mui/x-scheduler/models';
+import type {ReservationResponse} from "../../features/reservations/types/ReservationResponse.ts";
+import {getActiveReservations} from "../../features/reservations/api/getActiveReservations.ts";
+import {reservationToEvent} from "../../features/reservations/utils/ReservationToEvent.ts";
 
-const events = [
-    {
-        id: '1',
-        title: 'Project Kickoff',
-        start: '2026-05-01T10:00:00Z',
-        end: '2026-05-01T11:30:00Z',
-        color: 'blue'
-    }
-];
+export default function RenderEventCalendar() {
+    const [events, setEvents] = useState<SchedulerEvent[]>([]);
 
-const Main : React.FC = () => (
-    <div>
-            <IlamyCalendar
+    useEffect(() => {
+        const loadReservations = async () => {
+            try {
+                const reservations : ReservationResponse[] = await getActiveReservations();
+                const reservationEvents : SchedulerEvent[] = reservationToEvent(reservations);
+                setEvents(reservationEvents);
+            }
+            catch (error) {
+                console.error('Error loading reservations:', error);
+            }
+        };
+        loadReservations();
+    }, []);
+
+    return (
+        <div style={{ height: 600, width: '100%' }}>
+            <EventCalendar
                 events={events}
-                initialView="week"
-                onEventClick={(event) => console.log('Clicked:', event)}
+                onEventsChange={setEvents}
+                defaultVisibleDate={new Date(2026, 6, 30)}
             />
-    </div>
-);
-
-export default Main;
+        </div>
+    );
+}

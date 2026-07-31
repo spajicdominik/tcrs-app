@@ -4,12 +4,15 @@ import { Button, Form, Input } from 'antd';
 import axios, {type AxiosResponse} from "axios";
 import {AUTH_URL} from "../../../constants";
 import type {AuthenticationRequest} from "../types/AuthenticationRequest.ts";
+import type {AuthenticationResponse} from "../types/AuthenticationResponse.ts";
 
 const onFinish: FormProps<AuthenticationRequest>['onFinish'] = async (values) => {
     console.log('Success:', values);
     const payload : AuthenticationRequest = values;
     try {
-        const response : AxiosResponse<AuthenticatorResponse> = await axios.post(AUTH_URL + "/authenticate", payload);
+        const response : AxiosResponse<AuthenticationResponse> = await axios.post(AUTH_URL + "/authenticate", payload);
+        const data : AuthenticationResponse = response.data;
+        localStorage.setItem("access_token", data.access_token);
         return response.data;
     } catch (error) {
         console.error('Error:', error);
