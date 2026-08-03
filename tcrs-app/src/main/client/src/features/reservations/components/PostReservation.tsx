@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Alert, Button, Form, Modal, Select, TimePicker } from 'antd';
+import { Alert, Button, Form, Modal, Select, TimePicker, DatePicker, Flex } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { MatchType } from '../../match/types/MatchType';
 import type { CreateReservationRequest } from '../types/CreateReservationRequest';
+import type { DatePickerProps } from 'antd';
 
 const TIME_FORMAT = 'HH:mm';
 const DURATION_MINUTES = 90;
 const OPENING_HOUR = 7;
-// court closes 20:30 and a slot is 90 min, so the latest a reservation may start is 19:00
 const LATEST_START_HOUR = 19;
 
 const matchTypeOptions = [
@@ -72,6 +72,10 @@ export default function PostReservation() {
         handleClose();
     };
 
+    const onChange: DatePickerProps['onChange'] = (date, dateString) => {
+        console.log(date, dateString);
+    };
+
     return (
         <div className="flex justify-end p-4">
             <Button type="primary" size="large" onClick={() => setOpen(true)}>
@@ -92,6 +96,14 @@ export default function PostReservation() {
                     requiredMark="optional"
                     className="mt-4 flex flex-col gap-2"
                 >
+                    <Form.Item
+                        label="Datum termina"
+                        name="startDate"
+                        rules={[{ required: true, message: 'Molimo vas odaberite datum termina.' }]}
+                    >
+                        <DatePicker onChange={onChange} />
+                    </Form.Item>
+
                     <Form.Item
                         label="Pocetak termina"
                         name="startTime"
