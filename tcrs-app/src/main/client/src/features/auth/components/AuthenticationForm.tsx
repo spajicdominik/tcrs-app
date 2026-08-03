@@ -5,58 +5,64 @@ import axios, {type AxiosResponse} from "axios";
 import {AUTH_URL} from "../../../constants";
 import type {AuthenticationRequest} from "../types/AuthenticationRequest.ts";
 import type {AuthenticationResponse} from "../types/AuthenticationResponse.ts";
+import {useNavigate} from "react-router-dom";
 
-const onFinish: FormProps<AuthenticationRequest>['onFinish'] = async (values) => {
-    console.log('Success:', values);
-    const payload : AuthenticationRequest = values;
-    try {
-        const response : AxiosResponse<AuthenticationResponse> = await axios.post(AUTH_URL + "/authenticate", payload);
-        const data : AuthenticationResponse = response.data;
-        localStorage.setItem("access_token", data.access_token);
-        return response.data;
-    } catch (error) {
-        console.error('Error:', error);
-    }
-};
+const AuthenticationForm: React.FC = () => {
+    const navigate = useNavigate();
 
-const onFinishFailed: FormProps<AuthenticationRequest>['onFinishFailed'] = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-};
+    const onFinish: FormProps<AuthenticationRequest>['onFinish'] = async (values) => {
+        console.log('Success:', values);
+        const payload : AuthenticationRequest = values;
+        try {
+            const response : AxiosResponse<AuthenticationResponse> = await axios.post(AUTH_URL + "/authenticate", payload);
+            const data : AuthenticationResponse = response.data;
+            localStorage.setItem("access_token", data.access_token);
+            navigate("/")
+            return response.data;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
-const AuthenticationForm: React.FC = () => (
-    <Form
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
-        initialValues={{ remember: true,  phoneNumber: null }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        autoComplete="off"
-        className="flex flex-col gap-4"
-    >
-        <Form.Item<AuthenticationRequest>
-            label="E-mail"
-            name="email"
-            rules={[{ required: true, message: 'Molimo vas unesite e-mail!' }]}
+    const onFinishFailed: FormProps<AuthenticationRequest>['onFinishFailed'] = (errorInfo) => {
+        console.log('Failed:', errorInfo);
+    };
+
+    return (
+        <Form
+            name="basic"
+            labelCol={{span: 8}}
+            wrapperCol={{span: 16}}
+            style={{maxWidth: 600}}
+            initialValues={{remember: true, phoneNumber: null}}
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
+            autoComplete="off"
+            className="flex flex-col gap-4"
         >
-            <Input />
-        </Form.Item>
+            <Form.Item<AuthenticationRequest>
+                label="E-mail"
+                name="email"
+                rules={[{required: true, message: 'Molimo vas unesite e-mail!'}]}
+            >
+                <Input/>
+            </Form.Item>
 
-        <Form.Item<AuthenticationRequest>
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: 'Molimo vas unesite lozinku!' }]}
-        >
-            <Input.Password />
-        </Form.Item>
+            <Form.Item<AuthenticationRequest>
+                label="Password"
+                name="password"
+                rules={[{required: true, message: 'Molimo vas unesite lozinku!'}]}
+            >
+                <Input.Password/>
+            </Form.Item>
 
-        <Form.Item label={null}>
-            <Button type="primary" htmlType="submit">
-                Submit
-            </Button>
-        </Form.Item>
-    </Form>
-);
+            <Form.Item label={null}>
+                <Button type="primary" htmlType="submit">
+                    Submit
+                </Button>
+            </Form.Item>
+        </Form>
+    );
+}
 
 export default AuthenticationForm;

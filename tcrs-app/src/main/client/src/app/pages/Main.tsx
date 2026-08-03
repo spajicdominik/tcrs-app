@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import { EventCalendar } from '@mui/x-scheduler/event-calendar';
+import {StandaloneWeekView} from "@mui/x-scheduler";
 import type {SchedulerEvent} from '@mui/x-scheduler/models';
 import type {ReservationResponse} from "../../features/reservations/types/ReservationResponse.ts";
 import {getActiveReservations} from "../../features/reservations/api/getActiveReservations.ts";
@@ -24,10 +24,11 @@ export default function RenderEventCalendar() {
 
     return (
         <div style={{ height: 600, width: '100%' }}>
-            <EventCalendar
+            <StandaloneWeekView
                 events={events}
                 onEventsChange={setEvents}
-                defaultVisibleDate={new Date(2026, 6, 30)}
+                defaultVisibleDate={new Date(2026, 7, 4)}
+                readOnly={true}
             />
         </div>
     );
