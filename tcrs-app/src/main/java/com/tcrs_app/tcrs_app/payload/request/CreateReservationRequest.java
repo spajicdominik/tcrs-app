@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -16,7 +16,7 @@ import java.time.OffsetDateTime;
 public class CreateReservationRequest {
 
     @NotNull(message = "start time is required")
-    private OffsetDateTime timeStart;
+    private LocalDateTime timeStart;
 
     @NotNull(message = "match type is required")
     private MatchType matchType;

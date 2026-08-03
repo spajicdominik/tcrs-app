@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -14,8 +14,8 @@ import java.time.OffsetDateTime;
 public class ReservationResponse {
 
     private Long id;
-    private OffsetDateTime timeStart;
-    private OffsetDateTime timeEnd;
+    private LocalDateTime timeStart;
+    private LocalDateTime timeEnd;
     private String matchType;
     private boolean canceled;
 

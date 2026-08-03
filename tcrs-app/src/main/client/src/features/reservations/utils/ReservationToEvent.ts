@@ -7,6 +7,7 @@ export function reservationToEvent(reservations : ReservationResponse[]) {
     for (const reservation of reservations) {
         const event : SchedulerEvent = {
             id : reservation.id,
+            // backend sends zone-free wall-clock strings, which the scheduler renders literally
             title : reservation.mainPlayerName + ", " + reservation.partnerName,
             start : reservation.timeStart,
             end : reservation.timeEnd,

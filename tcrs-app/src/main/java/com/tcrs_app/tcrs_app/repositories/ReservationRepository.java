@@ -5,12 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByTimeStartBetween(OffsetDateTime from, OffsetDateTime to);
+    List<Reservation> findByTimeStartBetween(LocalDateTime from, LocalDateTime to);
 
     // two intervals overlap when each starts before the other ends;
     // canceled reservations free up their slot
@@ -20,5 +20,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
               AND r.timeStart < :end
               AND r.timeEnd > :start
             """)
-    boolean existsOverlapping(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
+    boolean existsOverlapping(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

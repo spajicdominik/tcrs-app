@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,7 +33,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationResponse> getActiveReservations() {
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         return reservationRepository.findByTimeStartBetween(now, now.plusDays(MAX_DAYS_AHEAD))
                 .stream()
                 .map(this::toResponse)
@@ -42,8 +42,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public ReservationResponse createReservation(CreateReservationRequest request, User currentUser) {
-        OffsetDateTime start = request.getTimeStart();
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime start = request.getTimeStart();
+        LocalDateTime now = LocalDateTime.now();
 
         if (start.getMinute() % 30 != 0 || start.getSecond() != 0 || start.getNano() != 0) {
             throw new ReservationException("Reservations must start on the hour or half hour.", HttpStatus.BAD_REQUEST);
@@ -62,7 +62,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new ReservationException("Reservations must start between 07:00 and 19:00.", HttpStatus.BAD_REQUEST);
         }
 
-        OffsetDateTime end = start.plusMinutes(DURATION_MINUTES);
+        LocalDateTime end = start.plusMinutes(DURATION_MINUTES);
 
         if (reservationRepository.existsOverlapping(start, end)) {
             throw new ReservationException("The selected time slot is already booked.", HttpStatus.CONFLICT);
