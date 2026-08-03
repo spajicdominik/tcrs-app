@@ -29,6 +29,8 @@ export default function RenderEventCalendar() {
                 onEventsChange={setEvents}
                 defaultVisibleDate={new Date(2026, 7, 4)}
                 readOnly={true}
+                // whole hours only; 22 shows the 21:00–22:00 row so 21:30 events are visible
+                viewConfig={{ week: { startTime: 7, endTime: 21 } }}
             />
         </div>
     );
