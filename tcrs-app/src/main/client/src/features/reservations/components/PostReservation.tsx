@@ -4,7 +4,9 @@ import dayjs, { type Dayjs } from 'dayjs';
 import { MatchType } from '../../match/types/MatchType';
 import type { CreateReservationRequest } from '../types/CreateReservationRequest';
 import type { DatePickerProps } from 'antd';
+import { toast } from 'react-toastify';
 import {createReservation} from "../api/createReservation.ts";
+import {getErrorMessage} from "../../../lib/getErrorMessage.ts";
 
 const TIME_FORMAT = 'HH:mm';
 const DURATION_MINUTES = 90;
@@ -63,7 +65,7 @@ export default function PostReservation() {
         form.resetFields();
     };
 
-    const onFinish = (values: ReservationFormValues) => {
+    const onFinish = async (values: ReservationFormValues) => {
         const date = values.startDate!.format('YYYY-MM-DD');
         const time = values.startTime!.format('HH:mm:00');
 
@@ -74,10 +76,16 @@ export default function PostReservation() {
             partnerId: values.partnerId ?? null,
         };
 
-        // TODO: hook up createReservation(payload) here
-        createReservation(payload);
-        handleClose();
-        window.location.reload();
+        try {
+            await createReservation(payload);
+            handleClose();
+            // refresh the calendar so the new reservation shows up
+            // (a full reload, so a success toast here wouldn't survive to render)
+            window.location.reload();
+        } catch (error) {
+            // on failure keep the modal open so the user can fix and retry
+            toast.error(getErrorMessage(error));
+        }
     };
 
     const onChange: DatePickerProps['onChange'] = (date, dateString) => {
@@ -85,7 +93,7 @@ export default function PostReservation() {
     };
 
     return (
-        <div className="flex justify-end p-4">
+        <div>
             <Button type="primary" size="large" onClick={() => setOpen(true)}>
                 NOVI TERMIN
             </Button>

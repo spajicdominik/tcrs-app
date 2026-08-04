@@ -4,6 +4,8 @@ import type {SchedulerEvent} from '@mui/x-scheduler/models';
 import type {ReservationResponse} from "../types/ReservationResponse.ts";
 import {getActiveReservations} from "../api/getActiveReservations.ts";
 import {reservationToEvent} from "../utils/ReservationToEvent.ts";
+import {toast} from "react-toastify";
+import {getErrorMessage} from "../../../lib/getErrorMessage.ts";
 
 export default function ReservationCalendar() {
     const [events, setEvents] = useState<SchedulerEvent[]>([]);
@@ -20,7 +22,7 @@ export default function ReservationCalendar() {
                 setEvents(reservationEvents);
             }
             catch (error) {
-                console.error('Error loading reservations:', error);
+                toast.error(getErrorMessage(error));
             }
         };
         loadReservations();
