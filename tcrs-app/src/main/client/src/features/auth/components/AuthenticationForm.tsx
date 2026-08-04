@@ -1,24 +1,21 @@
 import React from 'react';
 import type { FormProps } from 'antd';
 import { Button, Form, Input } from 'antd';
-import axios, {type AxiosResponse} from "axios";
+import axios from "axios";
 import {AUTH_URL} from "../../../constants";
 import type {AuthenticationRequest} from "../types/AuthenticationRequest.ts";
-import type {AuthenticationResponse} from "../types/AuthenticationResponse.ts";
 import {useNavigate} from "react-router-dom";
 
 const AuthenticationForm: React.FC = () => {
     const navigate = useNavigate();
 
     const onFinish: FormProps<AuthenticationRequest>['onFinish'] = async (values) => {
-        console.log('Success:', values);
         const payload : AuthenticationRequest = values;
         try {
-            const response : AxiosResponse<AuthenticationResponse> = await axios.post(AUTH_URL + "/authenticate", payload);
-            const data : AuthenticationResponse = response.data;
-            localStorage.setItem("access_token", data.access_token);
-            navigate("/")
-            return response.data;
+            // withCredentials lets the browser store the HttpOnly JWT cookie the backend sets.
+            // We deliberately do NOT read or store the token — it lives only in the cookie.
+            await axios.post(AUTH_URL + "/authenticate", payload, { withCredentials: true });
+            navigate("/");
         } catch (error) {
             console.error('Error:', error);
         }
