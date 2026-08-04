@@ -8,6 +8,10 @@ import {reservationToEvent} from "../utils/ReservationToEvent.ts";
 export default function ReservationCalendar() {
     const [events, setEvents] = useState<SchedulerEvent[]>([]);
 
+    // start the (week-aligned) view on today so it shows today + the next 6 days
+    const today = new Date();
+    const weekStartsOn = today.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
     useEffect(() => {
         const loadReservations = async () => {
             try {
@@ -27,10 +31,12 @@ export default function ReservationCalendar() {
             <StandaloneWeekView
                 events={events}
                 onEventsChange={setEvents}
-                defaultVisibleDate={new Date(2026, 7, 4)}
+                defaultVisibleDate={today}
                 readOnly={true}
                 // whole hours only; 22 shows the 21:00–22:00 row so 21:30 events are visible
                 viewConfig={{ week: { startTime: 7, endTime: 21 } }}
+                // week aligns to today's weekday -> window is today .. today + 6 days
+                defaultPreferences={{ weekStartsOn }}
             />
         </div>
     );

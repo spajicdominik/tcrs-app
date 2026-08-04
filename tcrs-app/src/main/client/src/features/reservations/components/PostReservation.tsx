@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Alert, Button, Form, Modal, Select, TimePicker, DatePicker, Flex } from 'antd';
+import { Alert, Button, Form, Modal, Select, TimePicker, DatePicker } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { MatchType } from '../../match/types/MatchType';
 import type { CreateReservationRequest } from '../types/CreateReservationRequest';
 import type { DatePickerProps } from 'antd';
+import {createReservation} from "../api/createReservation.ts";
 
 const TIME_FORMAT = 'HH:mm';
 const DURATION_MINUTES = 90;
@@ -23,6 +24,7 @@ const partnerOptions = [
 ];
 
 type ReservationFormValues = {
+    startDate?: Dayjs;
     startTime?: Dayjs;
     matchType?: MatchType;
     partnerId?: number | null;
@@ -36,6 +38,13 @@ const disabledTime = () => ({
     disabledMinutes: (selectedHour: number) =>
         selectedHour === LATEST_START_HOUR ? [30] : [],
 });
+
+// only today through 6 days from now can be booked (a one-week window)
+const disabledDate: DatePickerProps['disabledDate'] = (current) => {
+    const today = dayjs().startOf('day');
+    const lastBookableDay = dayjs().add(6, 'day').endOf('day');
+    return current.isBefore(today) || current.isAfter(lastBookableDay);
+};
 
 export default function PostReservation() {
     const [open, setOpen] = useState(false);
@@ -55,9 +64,7 @@ export default function PostReservation() {
     };
 
     const onFinish = (values: ReservationFormValues) => {
-        // TODO: the booking date should come from the calendar day the user selected;
-        // today's date is a placeholder until that's wired up.
-        const date = dayjs().format('YYYY-MM-DD');
+        const date = values.startDate!.format('YYYY-MM-DD');
         const time = values.startTime!.format('HH:mm:00');
 
         const payload: CreateReservationRequest = {
@@ -68,8 +75,9 @@ export default function PostReservation() {
         };
 
         // TODO: hook up createReservation(payload) here
-        console.log('Reservation payload (ready for API):', payload);
+        createReservation(payload);
         handleClose();
+        window.location.reload();
     };
 
     const onChange: DatePickerProps['onChange'] = (date, dateString) => {
@@ -101,7 +109,13 @@ export default function PostReservation() {
                         name="startDate"
                         rules={[{ required: true, message: 'Molimo vas odaberite datum termina.' }]}
                     >
-                        <DatePicker onChange={onChange} />
+                        <DatePicker
+                            className="w-full"
+                            format="DD.MM.YYYY."
+                            placeholder="Odaberi datum"
+                            disabledDate={disabledDate}
+                            onChange={onChange}
+                        />
                     </Form.Item>
 
                     <Form.Item
