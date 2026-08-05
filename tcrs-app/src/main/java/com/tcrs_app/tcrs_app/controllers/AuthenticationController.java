@@ -1,11 +1,13 @@
 package com.tcrs_app.tcrs_app.controllers;
 
+import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.payload.request.AuthenticationRequest;
 import com.tcrs_app.tcrs_app.payload.request.RefreshTokenRequest;
 import com.tcrs_app.tcrs_app.payload.request.RegisterRequest;
 import com.tcrs_app.tcrs_app.payload.response.AuthenticationResponse;
 import com.tcrs_app.tcrs_app.payload.response.RefreshTokenResponse;
 import com.tcrs_app.tcrs_app.payload.response.RegisterResponse;
+import com.tcrs_app.tcrs_app.payload.response.UserResponse;
 import com.tcrs_app.tcrs_app.services.AuthenticationService;
 import com.tcrs_app.tcrs_app.services.JwtService;
 import com.tcrs_app.tcrs_app.services.RefreshTokenService;
@@ -13,8 +15,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +29,20 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final RefreshTokenService refreshTokenService;
     private final JwtService jwtService;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(
+                UserResponse
+                        .builder()
+                        .id(currentUser.getId())
+                        .name(currentUser.getFirstName() + " " + currentUser.getLastName())
+                        .email(currentUser.getEmail())
+                        .role(currentUser.getRole().name())
+                        .phoneNumber(currentUser.getPhoneNumber())
+                        .build());
+    }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {

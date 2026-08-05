@@ -5,9 +5,14 @@ import axios from "axios";
 import {AUTH_URL} from "../../../constants";
 import type {AuthenticationRequest} from "../types/AuthenticationRequest.ts";
 import {useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
+import {useAppDispatch} from "../../../stores/hooks.ts";
+import {fetchCurrentUser} from "../stores/auth.ts";
+import {getErrorMessage} from "../../../lib/getErrorMessage.ts";
 
 const AuthenticationForm: React.FC = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     const onFinish: FormProps<AuthenticationRequest>['onFinish'] = async (values) => {
         const payload : AuthenticationRequest = values;
@@ -15,9 +20,13 @@ const AuthenticationForm: React.FC = () => {
             // withCredentials lets the browser store the HttpOnly JWT cookie the backend sets.
             // We deliberately do NOT read or store the token — it lives only in the cookie.
             await axios.post(AUTH_URL + "/authenticate", payload, { withCredentials: true });
+
+            // Populate the store BEFORE navigating, otherwise ProtectedRoute still sees
+            // 'anonymous' and bounces straight back to this page.
+            await dispatch(fetchCurrentUser()).unwrap();
             navigate("/");
         } catch (error) {
-            console.error('Error:', error);
+            toast.error(getErrorMessage(error));
         }
     };
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Alert, Button, Form, Modal, Select, TimePicker, DatePicker } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { MatchType } from '../../match/types/MatchType';
@@ -7,6 +7,10 @@ import type { DatePickerProps } from 'antd';
 import { toast } from 'react-toastify';
 import {createReservation} from "../api/createReservation.ts";
 import {getErrorMessage} from "../../../lib/getErrorMessage.ts";
+import type {PartnerOptions} from "../types/PartnerOptions.ts";
+import type {UserResponse} from "../../users/types/UserResponse.ts";
+import {getActiveUsers} from "../../users/api/getActiveUsers.ts";
+import {userResponseToOptions} from "../../users/utils/UserResponseToOptions.ts";
 
 const TIME_FORMAT = 'HH:mm';
 const DURATION_MINUTES = 90;
@@ -16,13 +20,6 @@ const LATEST_START_HOUR = 19;
 const matchTypeOptions = [
     { value: MatchType.Friendly, label: 'Prijateljska' },
     { value: MatchType.Tournament, label: 'Liga' },
-];
-
-// TODO: replace with players fetched from the API (e.g. GET /api/v1/users)
-const partnerOptions = [
-    { value: 2, label: 'Ivan Horvat' },
-    { value: 3, label: 'Marko Marić' },
-    { value: 4, label: 'Ana Kovač' },
 ];
 
 type ReservationFormValues = {
@@ -50,7 +47,22 @@ const disabledDate: DatePickerProps['disabledDate'] = (current) => {
 
 export default function PostReservation() {
     const [open, setOpen] = useState(false);
+    const [partnerOptions, setPartnerOptions] = useState<PartnerOptions[]>([]);
     const [form] = Form.useForm<ReservationFormValues>();
+
+    useEffect(() => {
+        const loadUsers = async () => {
+            try {
+                const users : UserResponse[] = await getActiveUsers();
+                const options : PartnerOptions[] = userResponseToOptions(users);
+                setPartnerOptions(options);
+            }
+            catch (e) {
+                toast.error(getErrorMessage(e));
+            }
+        };
+        loadUsers();
+    }, []);
 
     // live-watch the picked time so we can show the full reservation window
     const startTime = Form.useWatch('startTime', form);

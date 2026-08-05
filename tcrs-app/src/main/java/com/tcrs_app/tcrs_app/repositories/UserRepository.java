@@ -2,7 +2,6 @@ package com.tcrs_app.tcrs_app.repositories;
 
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.enums.AppUserStatus;
-import com.tcrs_app.tcrs_app.payload.response.UserResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -20,6 +19,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // admin: list everyone awaiting approval (or any status)
     List<User> findByStatus(AppUserStatus status);
-
-    List<User> getUsersByEnabledIsTrue();
 }

@@ -1,8 +1,7 @@
 package com.tcrs_app.tcrs_app.services;
 
-import com.tcrs_app.tcrs_app.entities.Reservation;
 import com.tcrs_app.tcrs_app.entities.User;
-import com.tcrs_app.tcrs_app.payload.response.ReservationResponse;
+import com.tcrs_app.tcrs_app.enums.AppUserStatus;
 import com.tcrs_app.tcrs_app.payload.response.UserResponse;
 import com.tcrs_app.tcrs_app.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,7 +19,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<UserResponse> getActiveUsers() {
-        return userRepository.getUsersByEnabledIsTrue()
+        return userRepository.findByStatus(AppUserStatus.ACTIVE)
                 .stream().map(this::toResponse).toList();
     }
 
@@ -28,6 +27,9 @@ public class UserServiceImpl implements UserService{
         return UserResponse.builder()
                 .id(user.getId())
                 .name(user.getFirstName() + " " + user.getLastName())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .phoneNumber(user.getPhoneNumber())
                 .build();
     }
 }
