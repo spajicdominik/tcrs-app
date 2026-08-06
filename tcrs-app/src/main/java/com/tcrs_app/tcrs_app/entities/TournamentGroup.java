@@ -3,6 +3,7 @@ package com.tcrs_app.tcrs_app.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
