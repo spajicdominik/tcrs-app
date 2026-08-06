@@ -3,9 +3,10 @@ package com.tcrs_app.tcrs_app.services;
 import com.tcrs_app.tcrs_app.entities.Tournament;
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.enums.TournamentPhase;
-import com.tcrs_app.tcrs_app.exception.ReservationException;
 import com.tcrs_app.tcrs_app.exception.TournamentException;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
+import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
+import com.tcrs_app.tcrs_app.payload.response.TournamentOptionsResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentResponse;
 import com.tcrs_app.tcrs_app.repositories.TournamentRepository;
 import jakarta.transaction.Transactional;
@@ -36,6 +37,12 @@ public class TournamentServiceImpl implements TournamentService{
                 .build();
 
         tournamentRepository.save(tournament);
+        return null;
+    }
+
+    @Override
+    public TournamentOptionsResponse generateTournamentOptions(TournamentOptionsRequest request, User currentUser) {
+        Integer numberOfPlayers = request.getPlayerIds().size();
         return null;
     }
 }
