@@ -4,6 +4,7 @@ import com.tcrs_app.tcrs_app.enums.TournamentPhase;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
