@@ -24,12 +24,13 @@ public class Match {
     @Column(name = "round_number", nullable = false)
     private Integer roundNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "player1_id", nullable = false)
+    // nullable: an elimination slot exists before the match feeding it has been decided
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player1_id")
     private User player1;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "player2_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player2_id")
     private User player2;
 
     // null until the match is played

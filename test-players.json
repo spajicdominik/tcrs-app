@@ -1,0 +1,14 @@
+[
+  { "firstName": "Luka",     "lastName": "Horvat",    "email": "luka.horvat@tcrs.com",     "password": "Tenis2026!", "phoneNumber": "+385911110001" },
+  { "firstName": "Marko",    "lastName": "Kovacevic", "email": "marko.kovacevic@tcrs.com", "password": "Tenis2026!", "phoneNumber": "+385911110002" },
+  { "firstName": "Ivan",     "lastName": "Babic",     "email": "ivan.babic@tcrs.com",      "password": "Tenis2026!", "phoneNumber": "+385911110003" },
+  { "firstName": "Petar",    "lastName": "Maric",     "email": "petar.maric@tcrs.com",     "password": "Tenis2026!", "phoneNumber": "+385911110004" },
+  { "firstName": "Ante",     "lastName": "Juric",     "email": "ante.juric@tcrs.com",      "password": "Tenis2026!", "phoneNumber": "+385911110005" },
+  { "firstName": "Josip",    "lastName": "Novak",     "email": "josip.novak@tcrs.com",     "password": "Tenis2026!", "phoneNumber": "+385911110006" },
+  { "firstName": "Tomislav", "lastName": "Vukovic",   "email": "tomislav.vukovic@tcrs.com","password": "Tenis2026!", "phoneNumber": "+385911110007" },
+  { "firstName": "Filip",    "lastName": "Knezevic",  "email": "filip.knezevic@tcrs.com",  "password": "Tenis2026!", "phoneNumber": "+385911110008" },
+  { "firstName": "Nikola",   "lastName": "Peric",     "email": "nikola.peric@tcrs.com",    "password": "Tenis2026!", "phoneNumber": "+385911110009" },
+  { "firstName": "Matej",    "lastName": "Blazevic",  "email": "matej.blazevic@tcrs.com",  "password": "Tenis2026!", "phoneNumber": "+385911110010" },
+  { "firstName": "Domagoj",  "lastName": "Saric",     "email": "domagoj.saric@tcrs.com",   "password": "Tenis2026!", "phoneNumber": "+385911110011" },
+  { "firstName": "Karlo",    "lastName": "Pavlovic",  "email": "karlo.pavlovic@tcrs.com",  "password": "Tenis2026!", "phoneNumber": "+385911110012" }
+]

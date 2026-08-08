@@ -7,6 +7,7 @@ import Main from "../app/pages/Main.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
 import { useAppDispatch } from "../stores/hooks.ts";
 import { clearUser, fetchCurrentUser } from "../features/auth/stores/auth.ts";
+import NewTournament from "../app/pages/NewTournament.tsx";
 
 const RoutesComponent = () => {
     const dispatch = useAppDispatch();
@@ -34,6 +35,7 @@ const RoutesComponent = () => {
                         {/* private: everything below requires a valid session */}
                         <Route element={<ProtectedRoute/>}>
                             <Route path="/" element={<Main/>}/>
+                            <Route path="/post-tournament" element={<NewTournament/>}/>
                         </Route>
                     </Route>
                 </Routes>

@@ -9,6 +9,7 @@ import com.tcrs_app.tcrs_app.enums.TournamentPhase;
 import com.tcrs_app.tcrs_app.exception.TournamentException;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
 import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
+import com.tcrs_app.tcrs_app.payload.response.TournamentMatchesResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentOption;
 import com.tcrs_app.tcrs_app.payload.response.TournamentOptionsResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentResponse;
@@ -17,6 +18,7 @@ import com.tcrs_app.tcrs_app.repositories.TournamentGroupRepository;
 import com.tcrs_app.tcrs_app.repositories.TournamentRepository;
 import com.tcrs_app.tcrs_app.repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -167,6 +169,11 @@ public class TournamentServiceImpl implements TournamentService{
                 .numberOfPlayers(numberOfPlayers)
                 .options(options)
                 .build();
+    }
+
+    @Override
+    public TournamentMatchesResponse generateTournamentMatches(@Valid Long id, User currentUser) {
+        return null;
     }
 
     /**

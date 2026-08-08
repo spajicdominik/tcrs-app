@@ -3,6 +3,7 @@ package com.tcrs_app.tcrs_app.controllers;
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
 import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
+import com.tcrs_app.tcrs_app.payload.response.TournamentMatchesResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentOptionsResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentResponse;
 import com.tcrs_app.tcrs_app.services.TournamentService;
@@ -34,7 +35,8 @@ public class TournamentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/generate-options")
+    @PostMapping("/generate-options")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> generateTournamentOptions(
             @Valid @RequestBody TournamentOptionsRequest request,
             @AuthenticationPrincipal User currentUser
@@ -43,6 +45,19 @@ public class TournamentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
         }
         TournamentOptionsResponse response = tournamentService.generateTournamentOptions(request, currentUser);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/{id}/generate-matches")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> generateTournamentMatches(
+            @Valid @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
+        TournamentMatchesResponse response = tournamentService.generateTournamentMatches(id, currentUser);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
