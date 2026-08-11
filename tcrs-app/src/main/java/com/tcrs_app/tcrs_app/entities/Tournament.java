@@ -27,4 +27,11 @@ public class Tournament {
 
     @Column(name = "qualifiers_per_group", nullable = false)
     private Integer qualifiersPerGroup;
+
+    /**
+     * The round the competition has nominally reached. Informational: players may enter
+     * the result of any of their matches, from any round, whenever it gets played.
+     */
+    @Column(name = "current_round", nullable = false)
+    private Integer currentRound;
 }

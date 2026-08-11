@@ -3,6 +3,7 @@ package com.tcrs_app.tcrs_app.controllers;
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
 import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
+import com.tcrs_app.tcrs_app.payload.response.GroupStandingsResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentMatchesResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentOptionsResponse;
 import com.tcrs_app.tcrs_app.payload.response.TournamentResponse;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/tournaments")
@@ -60,4 +63,18 @@ public class TournamentController {
         TournamentMatchesResponse response = tournamentService.generateTournamentMatches(id, currentUser);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/{id}/standings")
+    public ResponseEntity<?> getCurrentTournamentStandings(
+            @Valid @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
+        List<GroupStandingsResponse> response = tournamentService.getCurrentTournamentStandings(id, currentUser);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
 }

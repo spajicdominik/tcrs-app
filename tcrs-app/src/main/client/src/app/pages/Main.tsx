@@ -3,6 +3,7 @@ import PostReservation from "../../features/reservations/components/PostReservat
 import UserAvatar from "../../features/auth/components/UserAvatar.tsx";
 import {Button} from "antd";
 import {useNavigate} from "react-router-dom";
+import TournamentTable from "../../features/tournaments/components/TournamentTable.tsx";
 
 export default function Main() {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Main() {
                 <PostReservation/>
             </div>
             <ReservationCalendar/>
+            <TournamentTable/>
         </div>
     );
 }
