@@ -10,6 +10,7 @@ import com.tcrs_app.tcrs_app.enums.AppUserStatus;
 import com.tcrs_app.tcrs_app.enums.TournamentPhase;
 import com.tcrs_app.tcrs_app.exception.TournamentException;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
+import com.tcrs_app.tcrs_app.payload.request.MatchInsertRequest;
 import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
 import com.tcrs_app.tcrs_app.payload.response.*;
 import com.tcrs_app.tcrs_app.repositories.GroupPlayerRepository;
@@ -23,11 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -222,6 +219,83 @@ public class TournamentServiceImpl implements TournamentService{
                 .map(group -> buildGroupStandings(group, tournament.getQualifiersPerGroup()))
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public MatchInsertResponse insertTournamentMatchResult(MatchInsertRequest request, User currentUser) {
+        Match match = matchRepository.findById(request.getMatchId())
+                .orElseThrow(() -> new TournamentException("Match not found.", HttpStatus.NOT_FOUND));
+
+        if (!canEnterScore(match, currentUser)) {
+            throw new TournamentException("You are not allowed to enter score for this match.", HttpStatus.FORBIDDEN);
+        }
+
+        Integer p1Games = request.getPlayer1Games();
+        Integer p2Games = request.getPlayer2Games();
+
+        if (p1Games == null || p2Games == null) {
+            throw new TournamentException("Both player games must be provided.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (p1Games < 0 || p1Games > 9 || p2Games < 0 || p2Games > 9) {
+            throw new TournamentException("Games must be between 0 and 9.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (p1Games.equals(p2Games)) {
+            throw new TournamentException("Matches cannot end in a tie.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (p1Games < 9 && p2Games < 9) {
+            throw new TournamentException("One player must have 9 games.", HttpStatus.BAD_REQUEST);
+        }
+
+        match.setPlayer1Games(p1Games);
+        match.setPlayer2Games(p2Games);
+        match.setWinner(p1Games > p2Games ? match.getPlayer1() : match.getPlayer2());
+        match.setScoreEnteredBy(currentUser);
+
+        matchRepository.save(match);
+
+        return MatchInsertResponse.builder()
+                .match(toMatchResponse(match, currentUser))
+                .build();
+    }
+
+    @Override
+    public List<MatchRoundsResponse> getTorunamentMatchesByRounds(Long id, User currentUser) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new TournamentException("Tournament not found.", HttpStatus.NOT_FOUND));
+
+        List<TournamentGroup> groups = tournamentGroupRepository.findByTournamentOrderByNameAsc(tournament);
+
+        return matchRepository.findByGroupInOrderByRoundNumberAscIdAsc(groups).stream()
+                .collect(Collectors.groupingBy(Match::getRoundNumber, TreeMap::new, Collectors.toList()))
+                .entrySet().stream()
+                .map(entry -> MatchRoundsResponse.builder()
+                        .roundNumber(entry.getKey())
+                        .matches(entry.getValue().stream()
+                                .collect(Collectors.groupingBy(
+                                        m -> m.getGroup() != null ? m.getGroup().getId() : -1L,
+                                        LinkedHashMap::new,
+                                        Collectors.toList()
+                                ))
+                                .entrySet().stream()
+                                .map(groupEntry -> {
+                                    Match firstMatch = groupEntry.getValue().get(0);
+                                    return CurrentRoundGroupMatches.builder()
+                                            .groupId(groupEntry.getKey() != -1 ? groupEntry.getKey().intValue() : null)
+                                            .groupName(firstMatch.getGroup() != null ? firstMatch.getGroup().getName() : null)
+                                            .matches(groupEntry.getValue().stream()
+                                                    .map(match -> toMatchResponse(match, currentUser))
+                                                    .toList())
+                                            .build();
+                                })
+                                .toList())
+                        .build())
+                .toList();
+    }
+
+
 
     private GroupStandingsResponse buildGroupStandings(TournamentGroup group, Integer qualifiersPerGroup) {
         List<User> players = groupPlayerRepository.findByGroup(group).stream()

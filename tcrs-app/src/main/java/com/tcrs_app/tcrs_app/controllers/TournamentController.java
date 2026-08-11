@@ -2,11 +2,9 @@ package com.tcrs_app.tcrs_app.controllers;
 
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
+import com.tcrs_app.tcrs_app.payload.request.MatchInsertRequest;
 import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
-import com.tcrs_app.tcrs_app.payload.response.GroupStandingsResponse;
-import com.tcrs_app.tcrs_app.payload.response.TournamentMatchesResponse;
-import com.tcrs_app.tcrs_app.payload.response.TournamentOptionsResponse;
-import com.tcrs_app.tcrs_app.payload.response.TournamentResponse;
+import com.tcrs_app.tcrs_app.payload.response.*;
 import com.tcrs_app.tcrs_app.services.TournamentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -76,5 +74,28 @@ public class TournamentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/{id}/matches")
+    public ResponseEntity<?> getTournamentMatchesByRounds(
+            @Valid @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
+        List<MatchRoundsResponse> roundMatches = tournamentService.getTorunamentMatchesByRounds(id, currentUser);
+        return ResponseEntity.status(HttpStatus.OK).body(roundMatches);
+    }
+
+    @PutMapping("/{id}/matches")
+    public ResponseEntity<?> insertTournamentMatchResult(
+            @Valid @RequestBody MatchInsertRequest request,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
+        MatchInsertResponse response = tournamentService.insertTournamentMatchResult(request, currentUser);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }

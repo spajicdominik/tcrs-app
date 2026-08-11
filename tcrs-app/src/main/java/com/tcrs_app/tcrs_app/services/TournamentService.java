@@ -2,11 +2,9 @@ package com.tcrs_app.tcrs_app.services;
 
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
+import com.tcrs_app.tcrs_app.payload.request.MatchInsertRequest;
 import com.tcrs_app.tcrs_app.payload.request.TournamentOptionsRequest;
-import com.tcrs_app.tcrs_app.payload.response.GroupStandingsResponse;
-import com.tcrs_app.tcrs_app.payload.response.TournamentMatchesResponse;
-import com.tcrs_app.tcrs_app.payload.response.TournamentOptionsResponse;
-import com.tcrs_app.tcrs_app.payload.response.TournamentResponse;
+import com.tcrs_app.tcrs_app.payload.response.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -19,4 +17,8 @@ public interface TournamentService {
     TournamentMatchesResponse generateTournamentMatches(@Valid Long id, User currentUser);
 
     List<GroupStandingsResponse> getCurrentTournamentStandings(@Valid Long id, User currentUser);
+
+    MatchInsertResponse insertTournamentMatchResult(@Valid MatchInsertRequest request, User currentUser);
+
+    List<MatchRoundsResponse> getTorunamentMatchesByRounds(@Valid Long id, User currentUser);
 }

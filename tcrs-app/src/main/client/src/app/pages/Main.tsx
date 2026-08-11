@@ -4,6 +4,7 @@ import UserAvatar from "../../features/auth/components/UserAvatar.tsx";
 import {Button} from "antd";
 import {useNavigate} from "react-router-dom";
 import TournamentTable from "../../features/tournaments/components/TournamentTable.tsx";
+import TournamentMatchInsert from "../../features/tournaments/components/TournamentMatchInsert.tsx";
 
 export default function Main() {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function Main() {
             </div>
             <ReservationCalendar/>
             <TournamentTable/>
+            <TournamentMatchInsert/>
         </div>
     );
 }
