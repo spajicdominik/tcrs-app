@@ -1,6 +1,7 @@
 package com.tcrs_app.tcrs_app.repositories;
 
 import com.tcrs_app.tcrs_app.entities.Match;
+import com.tcrs_app.tcrs_app.entities.Tournament;
 import com.tcrs_app.tcrs_app.entities.TournamentGroup;
 import com.tcrs_app.tcrs_app.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +19,13 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByGroup(TournamentGroup group);
 
     List<Match> findByGroupInOrderByRoundNumberAscIdAsc(List<TournamentGroup> groups);
+
+    /**
+     * True while any group match of this tournament is still unplayed - i.e. the group
+     * phase is not finished yet. Reaches elimination matches too, which is why it can
+     * only be written now that match points at its tournament directly.
+     */
+    boolean existsByTournamentAndGroupIsNotNullAndWinnerIsNull(Tournament tournament);
 
     /**
      * Matches a player still has to play. Not a stored state - an unplayed match is

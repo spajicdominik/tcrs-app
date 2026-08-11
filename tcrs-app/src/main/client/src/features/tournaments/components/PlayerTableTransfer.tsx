@@ -29,8 +29,15 @@ const PlayerTableTransfer: React.FC<PlayerTableTransferProps> = ({
     targetKeys,
     onChange,
 }) => (
+    /*
+     * Transfer is two lists plus arrow buttons side by side, which cannot usefully
+     * fit on a phone. Rather than restructure it, the pair keeps a readable minimum
+     * width and the user swipes across it - the lists themselves stay fully usable.
+     */
+    <div className="w-full min-w-0 overflow-x-auto">
     <Transfer<PlayerRow>
-        style={{ width: '100%' }}
+        style={{ width: '100%', minWidth: 560 }}
+        listStyle={{ flex: 1, minWidth: 0 }}
         dataSource={players}
         targetKeys={targetKeys}
         onChange={onChange}
@@ -74,6 +81,7 @@ const PlayerTableTransfer: React.FC<PlayerTableTransferProps> = ({
             );
         }}
     </Transfer>
+    </div>
 );
 
 export default PlayerTableTransfer;

@@ -198,7 +198,7 @@ public class TournamentServiceImpl implements TournamentService{
             List<User> players = groupPlayerRepository.findByGroup(group).stream()
                     .map(GroupPlayer::getUser)
                     .collect(Collectors.toCollection(ArrayList::new));
-            createRoundRobin(group, players);
+            createRoundRobin(tournament, group, players);
         }
 
         // every round is playable from the start; this only records where the
@@ -321,7 +321,7 @@ public class TournamentServiceImpl implements TournamentService{
      * null "bye" is added to make the count even - whoever draws it simply rests that
      * round, and no match row is written for the pairing.
      */
-    private void createRoundRobin(TournamentGroup group, List<User> players) {
+    private void createRoundRobin(Tournament tournament, TournamentGroup group, List<User> players) {
         List<User> slots = new ArrayList<>(players);
         if (slots.size() % 2 != 0) {
             slots.add(null); // bye - a scheduling placeholder, never persisted
@@ -338,6 +338,9 @@ public class TournamentServiceImpl implements TournamentService{
 
                 if (player1 != null && player2 != null) {
                     Match match = new Match();
+                    // NOT NULL: a group match is reachable both ways, but the column is
+                    // what elimination matches will rely on, so it is always set
+                    match.setTournament(tournament);
                     match.setGroup(group);
                     match.setRoundNumber(round);
                     match.setPlayer1(player1);

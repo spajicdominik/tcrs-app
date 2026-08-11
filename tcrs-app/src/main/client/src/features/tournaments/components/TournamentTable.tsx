@@ -44,9 +44,12 @@ const TournamentTable: React.FC = () => {
         <Box
             sx={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                // min(320px, 100%) is the mobile fix: on a screen narrower than 320px
+                // the track collapses to the available width instead of overflowing
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))',
                 gap: 2,
                 width: '100%',
+                minWidth: 0,
             }}
         >
             {standings.map((group) => (
@@ -55,14 +58,36 @@ const TournamentTable: React.FC = () => {
                         Grupa {group.groupName}
                     </Typography>
 
-                    <TableContainer component={Paper}>
-                        <Table size="small" aria-label={`Tablica grupe ${group.groupName}`}>
+                    {/* the numeric columns are kept narrow and the name column takes
+                        the rest, so a long name wraps instead of widening the table */}
+                    <TableContainer component={Paper} sx={{overflowX: 'auto'}}>
+                        <Table
+                            size="small"
+                            aria-label={`Tablica grupe ${group.groupName}`}
+                            sx={{
+                                '& td, & th': {px: {xs: 1, sm: 2}},
+                                '& td:not(:first-of-type), & th:not(:first-of-type)': {
+                                    width: '1%',
+                                    whiteSpace: 'nowrap',
+                                },
+                            }}
+                        >
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Igrač</TableCell>
-                                    <TableCell align="right">Odigrano</TableCell>
-                                    <TableCell align="right">Bodovi</TableCell>
-                                    <TableCell align="right">Razlika</TableCell>
+                                    {/* abbreviated on phones, where the full words do not fit */}
+                                    <TableCell align="right">
+                                        <Box component="span" sx={{display: {xs: 'none', sm: 'inline'}}}>Odigrano</Box>
+                                        <Box component="span" sx={{display: {xs: 'inline', sm: 'none'}}}>Od.</Box>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Box component="span" sx={{display: {xs: 'none', sm: 'inline'}}}>Bodovi</Box>
+                                        <Box component="span" sx={{display: {xs: 'inline', sm: 'none'}}}>Bod.</Box>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Box component="span" sx={{display: {xs: 'none', sm: 'inline'}}}>Razlika</Box>
+                                        <Box component="span" sx={{display: {xs: 'inline', sm: 'none'}}}>+/-</Box>
+                                    </TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>

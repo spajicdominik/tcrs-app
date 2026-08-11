@@ -113,7 +113,7 @@ const NewTournament: React.FC = () => {
     };
 
     return (
-        <Flex align="start" gap="middle" vertical className="w-full p-4">
+        <Flex align="start" gap="middle" vertical className="w-full min-w-0 p-3 sm:p-4">
             <PlayerTableTransfer
                 players={players}
                 targetKeys={targetKeys}
@@ -124,6 +124,7 @@ const NewTournament: React.FC = () => {
 
             <Button
                 type="primary"
+                className="w-full sm:!w-auto"
                 disabled={selectedPlayerIds.length === 0}
                 onClick={() => generateOptions(selectedPlayerIds)}
             >
@@ -131,7 +132,7 @@ const NewTournament: React.FC = () => {
             </Button>
 
             {options && options.options.length > 0 && (
-                <Space direction="vertical" size="middle" className="w-full max-w-md">
+                <Space direction="vertical" size="middle" className="w-full sm:max-w-md">
                     <Input
                         placeholder="Naziv natjecanja"
                         value={name}

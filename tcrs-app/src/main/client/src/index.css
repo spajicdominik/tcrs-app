@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+/*
+ * Global responsive guards.
+ *
+ * Individual components decide how they reflow; these rules only make sure that a
+ * single stubborn child (a wide table, a fixed-width modal) can never force the whole
+ * page to scroll sideways, which is the usual way a desktop layout breaks on a phone.
+ */
+
+html {
+    /* stops iOS Safari inflating text in landscape and wrecking column widths */
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    /* wide content scrolls inside its own container, never by moving the page */
+    overflow-x: hidden;
+}
+
+/*
+ * antd modals default to a fixed 520px, which overflows every phone screen.
+ * Capping the width here fixes all of them at once - reservations, profile,
+ * score entry - instead of passing a width prop to each.
+ */
+.ant-modal {
+    max-width: calc(100vw - 2rem);
+}
+
+/* antd pickers open in a portal at the document root, so they need the same cap */
+.ant-picker-dropdown,
+.ant-select-dropdown {
+    max-width: calc(100vw - 2rem);
+}
+
+/*
+ * Touch targets. The WCAG minimum is 44px; antd's default control height is 32px,
+ * which is fiddly on a phone but fine with a mouse - so only raise it on touch
+ * screens, and leave the desktop layout exactly as it was.
+ */
+@media (hover: none) and (pointer: coarse) {
+    .ant-btn,
+    .ant-select-selector,
+    .ant-picker,
+    .ant-input,
+    .ant-input-number-input {
+        min-height: 2.75rem;
+    }
+}

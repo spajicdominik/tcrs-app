@@ -9,10 +9,12 @@ import {toast} from "react-toastify";
 import {useAppDispatch} from "../../../stores/hooks.ts";
 import {fetchCurrentUser} from "../stores/auth.ts";
 import {getErrorMessage} from "../../../lib/getErrorMessage.ts";
+import {useIsMobile} from "../../../hooks/useIsMobile.ts";
 
 const AuthenticationForm: React.FC = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const isMobile = useIsMobile();
 
     const onFinish: FormProps<AuthenticationRequest>['onFinish'] = async (values) => {
         const payload : AuthenticationRequest = values;
@@ -37,14 +39,16 @@ const AuthenticationForm: React.FC = () => {
     return (
         <Form
             name="basic"
-            labelCol={{span: 8}}
-            wrapperCol={{span: 16}}
+            // label above the field on a phone; the original side-by-side layout from sm up
+            layout={isMobile ? 'vertical' : 'horizontal'}
+            labelCol={isMobile ? undefined : {span: 8}}
+            wrapperCol={isMobile ? undefined : {span: 16}}
             style={{maxWidth: 600}}
+            className="flex w-[min(100%,600px)] flex-col gap-4"
             initialValues={{remember: true, phoneNumber: null}}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete="off"
-            className="flex flex-col gap-4"
         >
             <Form.Item<AuthenticationRequest>
                 label="E-mail"
@@ -63,7 +67,7 @@ const AuthenticationForm: React.FC = () => {
             </Form.Item>
 
             <Form.Item label={null}>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" block={isMobile}>
                     Submit
                 </Button>
             </Form.Item>

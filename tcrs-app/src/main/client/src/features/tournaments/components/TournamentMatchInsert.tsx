@@ -90,9 +90,12 @@ const TournamentMatchInsert: React.FC = () => {
                     <Box
                         sx={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                            // min(...) so the track can collapse below 320px instead of
+                            // pushing the page sideways on a narrow phone
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))',
                             gap: 2,
                             width: '100%',
+                            minWidth: 0,
                         }}
                     >
                         {round.matches.map((groupMatches) => (
@@ -101,8 +104,20 @@ const TournamentMatchInsert: React.FC = () => {
                                     {groupMatches.groupName ? `Grupa ${groupMatches.groupName}` : 'Eliminacijska faza'}
                                 </Typography>
 
-                                <TableContainer component={Paper}>
-                                    <Table size="small" aria-label={`Matches for ${groupMatches.groupName || 'round'}`}>
+                                <TableContainer component={Paper} sx={{overflowX: 'auto'}}>
+                                    <Table
+                                        size="small"
+                                        aria-label={`Matches for ${groupMatches.groupName || 'round'}`}
+                                        sx={{
+                                            '& td, & th': {px: {xs: 1, sm: 2}},
+                                            // the score column hugs its content so the two
+                                            // name columns share everything that is left
+                                            '& td:last-of-type, & th:last-of-type': {
+                                                width: '1%',
+                                                whiteSpace: 'nowrap',
+                                            },
+                                        }}
+                                    >
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Player 1</TableCell>
@@ -158,25 +173,41 @@ const TournamentMatchInsert: React.FC = () => {
                             {selectedMatch.player1Name} vs {selectedMatch.player2Name}
                         </Typography>
                         
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        {/* a long name and the input side by side squeeze each other on a
+                            phone, so the label sits above the field until `sm` */}
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', sm: 'row' },
+                            alignItems: { xs: 'flex-start', sm: 'center' },
+                            justifyContent: 'space-between',
+                            gap: 1,
+                        }}>
                             <Typography>{selectedMatch.player1Name}</Typography>
                             <InputNumber
                                 placeholder={'gemovi'}
-                                min={1} 
-                                max={9} 
-                                value={player1Score} 
-                                onChange={(value) => setPlayer1Score(value)} 
+                                inputMode="numeric"
+                                min={1}
+                                max={9}
+                                value={player1Score}
+                                onChange={(value) => setPlayer1Score(value)}
                             />
                         </Box>
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', sm: 'row' },
+                            alignItems: { xs: 'flex-start', sm: 'center' },
+                            justifyContent: 'space-between',
+                            gap: 1,
+                        }}>
                             <Typography>{selectedMatch.player2Name}</Typography>
                             <InputNumber
                                 placeholder={'gemovi'}
-                                min={1} 
-                                max={9} 
-                                value={player2Score} 
-                                onChange={(value) => setPlayer2Score(value)} 
+                                inputMode="numeric"
+                                min={1}
+                                max={9}
+                                value={player2Score}
+                                onChange={(value) => setPlayer2Score(value)}
                             />
                         </Box>
                     </Box>

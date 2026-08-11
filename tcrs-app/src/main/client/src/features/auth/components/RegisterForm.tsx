@@ -4,6 +4,7 @@ import { Button, Form, Input } from 'antd';
 import type {RegisterRequest} from "../types/RegisterRequest.ts";
 import axios, {type AxiosResponse} from "axios";
 import {AUTH_URL} from "../../../constants";
+import {useIsMobile} from "../../../hooks/useIsMobile.ts";
 
 const onFinish: FormProps<RegisterRequest>['onFinish'] = async (values) => {
     console.log('Success:', values);
@@ -20,17 +21,23 @@ const onFinishFailed: FormProps<RegisterRequest>['onFinishFailed'] = (errorInfo)
     console.log('Failed:', errorInfo);
 };
 
-const RegisterForm: React.FC = () => (
+const RegisterForm: React.FC = () => {
+    const isMobile = useIsMobile();
+
+    return (
     <Form
         name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
+        // side-by-side labels leave too little room for the input on a phone, so the
+        // label moves above the field there
+        layout={isMobile ? 'vertical' : 'horizontal'}
+        labelCol={isMobile ? undefined : { span: 8 }}
+        wrapperCol={isMobile ? undefined : { span: 16 }}
         style={{ maxWidth: 600 }}
+        className="flex w-[min(100%,600px)] flex-col gap-4"
         initialValues={{ remember: true,  phoneNumber: null }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
-        className="flex flex-col gap-4"
     >
         <Form.Item<RegisterRequest>
             label="E-mail"
@@ -73,11 +80,12 @@ const RegisterForm: React.FC = () => (
         </Form.Item>
 
         <Form.Item label={null}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" block={isMobile}>
                 Submit
             </Button>
         </Form.Item>
     </Form>
-);
+    );
+};
 
 export default RegisterForm;

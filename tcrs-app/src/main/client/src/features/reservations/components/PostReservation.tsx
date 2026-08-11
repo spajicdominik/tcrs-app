@@ -105,8 +105,14 @@ export default function PostReservation() {
     };
 
     return (
-        <div>
-            <Button type="primary" size="large" onClick={() => setOpen(true)}>
+        <div className="w-full sm:w-auto">
+            <Button
+                type="primary"
+                size="large"
+                block
+                className="sm:!w-auto"
+                onClick={() => setOpen(true)}
+            >
                 NOVI TERMIN
             </Button>
 

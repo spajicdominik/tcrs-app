@@ -16,6 +16,14 @@ public class Match {
     @Column(name = "id")
     private Long id;
 
+    /**
+     * The tournament this match belongs to. Always set - it is the only link for
+     * elimination matches, which have no group.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tournament_id", nullable = false)
+    private Tournament tournament;
+
     // null for elimination matches
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
