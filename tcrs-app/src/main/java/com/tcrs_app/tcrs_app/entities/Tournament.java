@@ -1,5 +1,6 @@
 package com.tcrs_app.tcrs_app.entities;
 
+import com.tcrs_app.tcrs_app.enums.EliminationFormat;
 import com.tcrs_app.tcrs_app.enums.TournamentPhase;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,6 +28,11 @@ public class Tournament {
 
     @Column(name = "qualifiers_per_group", nullable = false)
     private Integer qualifiersPerGroup;
+
+    /** Which shape the knockout stage takes; chosen when the tournament is created. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "elimination_format", nullable = false, length = 20)
+    private EliminationFormat eliminationFormat;
 
     /**
      * The round the competition has nominally reached. Informational: players may enter

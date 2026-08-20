@@ -7,6 +7,7 @@ import com.tcrs_app.tcrs_app.entities.TournamentGroup;
 import com.tcrs_app.tcrs_app.entities.User;
 import com.tcrs_app.tcrs_app.enums.AppUserRole;
 import com.tcrs_app.tcrs_app.enums.AppUserStatus;
+import com.tcrs_app.tcrs_app.enums.EliminationFormat;
 import com.tcrs_app.tcrs_app.enums.TournamentPhase;
 import com.tcrs_app.tcrs_app.exception.TournamentException;
 import com.tcrs_app.tcrs_app.payload.request.CreateTournamentRequest;
@@ -57,8 +58,9 @@ public class TournamentServiceImpl implements TournamentService{
                 .name(request.getName())
                 .phase(TournamentPhase.GROUP)
                 .qualifiersPerGroup(request.getQualifiersPerGroup())
-                // NOT NULL column: Hibernate includes it in the INSERT, so the DB
-                // default never applies and it has to be set explicitly here
+                // both NOT NULL: Hibernate includes mapped columns in the INSERT, so
+                // the DB defaults never apply and they have to be set explicitly here
+                .eliminationFormat(formatOf(request.getEliminationFormat()))
                 .currentRound(1)
                 .build());
 
@@ -86,6 +88,11 @@ public class TournamentServiceImpl implements TournamentService{
                 .name(tournament.getName())
                 .numberOfGroups(groups.size())
                 .build();
+    }
+
+    /** Older clients omit the field entirely; the original format stays the default. */
+    private EliminationFormat formatOf(EliminationFormat requested) {
+        return requested == null ? EliminationFormat.SINGLE_BRACKET : requested;
     }
 
     private void validateLayout(CreateTournamentRequest request, List<Integer> groupSizes) {

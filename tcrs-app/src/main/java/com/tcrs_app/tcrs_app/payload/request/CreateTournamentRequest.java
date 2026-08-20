@@ -1,5 +1,6 @@
 package com.tcrs_app.tcrs_app.payload.request;
 
+import com.tcrs_app.tcrs_app.enums.EliminationFormat;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -29,4 +30,7 @@ public class CreateTournamentRequest {
 
     @NotEmpty(message = "players are required")
     private List<Long> playerIds;
+
+    /** Defaults to SINGLE_BRACKET when omitted, so existing clients keep working. */
+    private EliminationFormat eliminationFormat;
 }

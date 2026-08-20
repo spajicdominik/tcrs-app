@@ -32,6 +32,14 @@ public class Match {
     @Column(name = "round_number", nullable = false)
     private Integer roundNumber;
 
+    /**
+     * The place this knockout match is being played for: 1 for the winners' bracket,
+     * 2 for the runners-up, and so on. Null for group matches, and for the single
+     * bracket format where there is only one thing to play for.
+     */
+    @Column(name = "bracket_position")
+    private Integer bracketPosition;
+
     // nullable: an elimination slot exists before the match feeding it has been decided
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player1_id")
