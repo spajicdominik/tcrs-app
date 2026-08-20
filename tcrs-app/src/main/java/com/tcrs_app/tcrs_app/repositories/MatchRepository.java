@@ -28,6 +28,21 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     boolean existsByTournamentAndGroupIsNotNullAndWinnerIsNull(Tournament tournament);
 
     /**
+     * The (at most two) matches whose winners feed the given tie. Ordered by id, which
+     * is creation order, so the first is always the upper slot of the pairing.
+     */
+    List<Match> findByNextMatchOrderByIdAsc(Match nextMatch);
+
+    /** Elimination matches are exactly the ones with no group - the bracket exists already. */
+    boolean existsByTournamentAndGroupIsNull(Tournament tournament);
+
+    /**
+     * Every match of the tournament, group and elimination alike. The group-based
+     * variant above cannot see elimination matches, whose group is null.
+     */
+    List<Match> findByTournamentOrderByRoundNumberAscIdAsc(Tournament tournament);
+
+    /**
      * Matches a player still has to play. Not a stored state - an unplayed match is
      * simply one without a winner, whatever round it belongs to.
      */

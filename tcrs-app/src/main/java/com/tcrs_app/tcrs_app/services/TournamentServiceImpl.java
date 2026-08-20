@@ -216,15 +216,90 @@ public class TournamentServiceImpl implements TournamentService{
     }
 
     @Override
-    public List<GroupStandingsResponse> getCurrentTournamentStandings(Long id, User currentUser) {
+    public TournamentStandingsResponse getCurrentTournamentStandings(Long id, User currentUser) {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new TournamentException("Tournament not found.", HttpStatus.NOT_FOUND));
 
-        List<TournamentGroup> groups = tournamentGroupRepository.findByTournamentOrderByNameAsc(tournament);
+        List<GroupStandingsResponse> groupStandings = buildAllGroupStandings(tournament);
 
-        return groups.stream()
-                .map(group -> buildGroupStandings(group, tournament.getQualifiersPerGroup()))
+        return TournamentStandingsResponse.builder()
+                .tournamentId(tournament.getId())
+                .phase(tournament.getPhase().name())
+                .readyForElimination(readyForElimination(tournament, groupStandings))
+                .groups(groupStandings)
+                .build();
+    }
+
+    @Override
+    public ActiveTournamentResponse getActiveTournament(User currentUser) {
+        // createTournament allows only one open season at a time, so there is at most one
+        return tournamentRepository.findByPhaseNot(TournamentPhase.CLOSED).stream()
+                .findFirst()
+                .map(tournament -> ActiveTournamentResponse.builder()
+                        .active(true)
+                        .id(tournament.getId())
+                        .name(tournament.getName())
+                        .phase(tournament.getPhase().name())
+                        .canFinish(isCompleted(tournament))
+                        .build())
+                .orElseGet(() -> ActiveTournamentResponse.builder()
+                        .active(false)
+                        .canFinish(false)
+                        .build());
+    }
+
+    @Override
+    public ActiveTournamentResponse finishTournament(Long id, User currentUser) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new TournamentException("Tournament not found.", HttpStatus.NOT_FOUND));
+
+        if (tournament.getPhase() == TournamentPhase.CLOSED) {
+            throw new TournamentException("This tournament is already closed.", HttpStatus.BAD_REQUEST);
+        }
+        if (!isCompleted(tournament)) {
+            throw new TournamentException(
+                    "The final has not been played yet, so the tournament cannot be closed.",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        // CLOSED, not FINISHED: createTournament refuses while any tournament is not
+        // closed, so this is the state that frees the club to start the next season
+        tournament.setPhase(TournamentPhase.CLOSED);
+        tournamentRepository.save(tournament);
+
+        return getActiveTournament(currentUser);
+    }
+
+    /**
+     * A tournament is over when its bracket exists and every final has a winner. A final
+     * is an elimination match that feeds nothing - PER_POSITION has one per place.
+     */
+    private boolean isCompleted(Tournament tournament) {
+        List<Match> finals = matchRepository.findByTournamentOrderByRoundNumberAscIdAsc(tournament).stream()
+                .filter(match -> match.getGroup() == null)
+                .filter(match -> match.getNextMatch() == null)
                 .toList();
+
+        return !finals.isEmpty() && finals.stream().allMatch(match -> match.getWinner() != null);
+    }
+
+    private List<GroupStandingsResponse> buildAllGroupStandings(Tournament tournament) {
+        return tournamentGroupRepository.findByTournamentOrderByNameAsc(tournament).stream()
+                .map(group -> buildGroupStandings(
+                        group, tournament.getQualifiersPerGroup(), formatOf(tournament.getEliminationFormat())))
+                .toList();
+    }
+
+    /**
+     * The two guards are not redundant: allMatch on an empty stream returns true, so a
+     * tournament with no groups would otherwise claim to be ready, and one that has
+     * already advanced would offer to advance a second time.
+     */
+    private boolean readyForElimination(Tournament tournament, List<GroupStandingsResponse> groupStandings) {
+        return !groupStandings.isEmpty()
+                && tournament.getPhase() == TournamentPhase.GROUP
+                && groupStandings.stream()
+                        .allMatch(g -> g.getComplete() && g.getQualifiersDecided());
     }
 
     @Override
@@ -304,20 +379,53 @@ public class TournamentServiceImpl implements TournamentService{
 
 
 
-    private GroupStandingsResponse buildGroupStandings(TournamentGroup group, Integer qualifiersPerGroup) {
+    private GroupStandingsResponse buildGroupStandings(
+            TournamentGroup group, Integer qualifiersPerGroup, EliminationFormat format) {
+
         List<User> players = groupPlayerRepository.findByGroup(group).stream()
                 .map(GroupPlayer::getUser)
                 .toList();
         List<Match> matches = matchRepository.findByGroup(group);
+        List<StandingRowResponse> rows = standingsCalculator.calculate(players, matches);
+
+        // derived, not stored: the group is done when nothing is left unresolved
+        int matchesRemaining = (int) matches.stream().filter(m -> m.getWinner() == null).count();
 
         return GroupStandingsResponse.builder()
                 .groupId(group.getId())
                 .groupName(group.getName())
                 .qualifiersPerGroup(qualifiersPerGroup)
-                // derived, not stored: the group is done when nothing is left unresolved
-                .complete(!matches.isEmpty() && matches.stream().allMatch(m -> m.getWinner() != null))
-                .rows(standingsCalculator.calculate(players, matches))
+                .complete(!matches.isEmpty() && matchesRemaining == 0)
+                .matchesRemaining(matchesRemaining)
+                .qualifiersDecided(qualifiersDecided(rows, qualifiersPerGroup, format))
+                .rows(rows)
                 .build();
+    }
+
+    /**
+     * Whether the group's qualifiers can be named. Only a tie AT the cut line blocks it -
+     * a three-way tie for third place is irrelevant when two players go through.
+     */
+    private boolean qualifiersDecided(
+            List<StandingRowResponse> rows, int qualifiersPerGroup, EliminationFormat format) {
+
+        /*
+         * With a bracket for every place, the finishing position decides WHICH bracket a
+         * player enters, so a tie for fourth is exactly as blocking as a tie for first.
+         * There is no cut line to be on the right side of - every place must be settled.
+         */
+        if (format == EliminationFormat.PER_POSITION) {
+            return rows.stream().map(StandingRowResponse::getPosition).distinct().count() == rows.size();
+        }
+
+        // no cut line to straddle: the whole group goes through
+        if (rows.size() <= qualifiersPerGroup) {
+            return true;
+        }
+
+        // equals, not ==: position is a boxed Integer and would compare by reference
+        return !rows.get(qualifiersPerGroup - 1).getPosition()
+                .equals(rows.get(qualifiersPerGroup).getPosition());
     }
 
     /**

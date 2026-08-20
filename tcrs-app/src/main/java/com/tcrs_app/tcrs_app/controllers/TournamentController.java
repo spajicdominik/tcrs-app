@@ -62,6 +62,31 @@ public class TournamentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    /**
+     * The season currently running, if any. Drives whether a new tournament may be
+     * created and whether the current one can be closed.
+     */
+    @GetMapping("/active")
+    public ResponseEntity<?> getActiveTournament(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(tournamentService.getActiveTournament(currentUser));
+    }
+
+    /** Closes a completed season, which frees the club to create the next one. */
+    @PostMapping("/{id}/finish")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> finishTournament(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(tournamentService.finishTournament(id, currentUser));
+    }
+
     @GetMapping("/{id}/standings")
     public ResponseEntity<?> getCurrentTournamentStandings(
             @Valid @PathVariable Long id,
@@ -70,7 +95,7 @@ public class TournamentController {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found/Unauthorized user");
         }
-        List<GroupStandingsResponse> response = tournamentService.getCurrentTournamentStandings(id, currentUser);
+        TournamentStandingsResponse response = tournamentService.getCurrentTournamentStandings(id, currentUser);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

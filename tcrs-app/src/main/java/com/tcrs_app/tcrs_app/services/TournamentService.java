@@ -16,7 +16,11 @@ public interface TournamentService {
 
     TournamentMatchesResponse generateTournamentMatches(@Valid Long id, User currentUser);
 
-    List<GroupStandingsResponse> getCurrentTournamentStandings(@Valid Long id, User currentUser);
+    TournamentStandingsResponse getCurrentTournamentStandings(@Valid Long id, User currentUser);
+
+    ActiveTournamentResponse getActiveTournament(User currentUser);
+
+    ActiveTournamentResponse finishTournament(@Valid Long id, User currentUser);
 
     MatchInsertResponse insertTournamentMatchResult(@Valid MatchInsertRequest request, User currentUser);
 
